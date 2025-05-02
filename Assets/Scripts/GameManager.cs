@@ -28,10 +28,11 @@ public class GameManager : Singleton<GameManager>
 
     private void UpdateUI()
     {
+        // Ensure UI is updated with the current lives
         livesUI?.UpdateLives(pacmanLives, ghostLives);
     }
 
-
+    // Called when any dot is collected by PacMan
     public void DotCollected()
     {
         remainingDots--;
@@ -45,12 +46,12 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    // Called when PacMan collects a Power Dot
     public void PowerDotCollected()
     {
         Debug.Log("Power Dot collected! PacMan is now hunting.");
 
-        Enemy pacman = FindFirstObjectByType<Enemy>()
-;
+        Enemy pacman = FindFirstObjectByType<Enemy>();
         if (pacman != null)
         {
             pacman.EnterHuntMode();
@@ -58,67 +59,73 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    // Called when PacMan is hit by the Ghost
     public void PacmanHit()
-{
-    pacmanLives--;
-    UpdateUI();
+    {
+        pacmanLives--;
+        UpdateUI();
 
-    if (pacmanLives <= 0)
-        WinGame();
-    else
-        RespawnPacman();
-}
+        if (pacmanLives <= 0)
+            WinGame(); // Ghost wins
+        else
+            RespawnPacman();
+    }
 
-public void GhostHit()
-{
-    ghostLives--;
-    UpdateUI();
+    // Called when Ghost is hit by PacMan
+    public void GhostHit()
+    {
+        ghostLives--;
+        UpdateUI();
 
-    if (ghostLives <= 0)
-        LoseGame();
-    else
-        RespawnGhost();
-}
+        if (ghostLives <= 0)
+            LoseGame(); // PacMan wins
+        else
+            RespawnGhost();
+    }
 
-
+    // Respawn PacMan to its spawn point
     private void RespawnPacman()
-{
-    Enemy pacman = FindFirstObjectByType<Enemy>()
-;
-    if (pacman != null && pacmanSpawn != null)
     {
-        pacman.transform.position = pacmanSpawn.position;
-        pacman.agent.Warp(pacmanSpawn.position); // Reset NavMeshAgent position
+        Enemy pacman = FindFirstObjectByType<Enemy>();
+        if (pacman != null && pacmanSpawn != null)
+        {
+            pacman.transform.position = pacmanSpawn.position;
+            pacman.agent.Warp(pacmanSpawn.position); // Reset NavMeshAgent position
+            pacman.SetAppearance(Color.yellow); // Optional: Reset appearance to normal
+        }
     }
-}
 
-private void RespawnGhost()
-{
-    GhostController ghost = FindFirstObjectByType<GhostController>();
-    if (ghost != null && ghostSpawn != null)
+    // Respawn Ghost to its spawn point
+    private void RespawnGhost()
     {
-        ghost.transform.position = ghostSpawn.position;
+        GhostController ghost = FindFirstObjectByType<GhostController>();
+        if (ghost != null && ghostSpawn != null)
+        {
+            ghost.transform.position = ghostSpawn.position;
+            // Reset Ghost appearance if needed
+        }
     }
-}
 
-
-
+    // End the game with PacMan winning
     private void WinGame()
     {
         Debug.Log("You win!");
-        // TODO: Show UI / restart
+        // TODO: Show UI / restart the scene after winning
         RestartScene();
     }
 
+    // End the game with Ghost winning
     private void LoseGame()
     {
         Debug.Log("You lose!");
-        // TODO: Show UI / restart
+        // TODO: Show UI / restart the scene after losing
         RestartScene();
     }
 
+    // Restart the scene (for both win and lose)
     private void RestartScene()
     {
+        // Optionally, you could show a Game Over screen before restarting.
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
