@@ -3,6 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
+    private LivesUI livesUI;
+
     public int pacmanLives = 3;
     public int ghostLives = 3;
 
@@ -15,11 +17,20 @@ public class GameManager : Singleton<GameManager>
 
     void Start()
     {
+        livesUI = FindFirstObjectByType<LivesUI>();
+        UpdateUI();
+        
         // Count small dots only — big dots handled separately
         remainingDots = FindObjectsByType<Dot>(FindObjectsSortMode.None).Length;
 
         Debug.Log($"Dots in level: {remainingDots}");
     }
+
+    private void UpdateUI()
+    {
+        livesUI?.UpdateLives(pacmanLives, ghostLives);
+    }
+
 
     public void DotCollected()
     {
@@ -50,33 +61,25 @@ public class GameManager : Singleton<GameManager>
     public void PacmanHit()
 {
     pacmanLives--;
-    Debug.Log($"PacMan hit! Lives left: {pacmanLives}");
+    UpdateUI();
 
     if (pacmanLives <= 0)
-    {
         WinGame();
-    }
     else
-    {
         RespawnPacman();
-    }
 }
 
-
-    public void GhostHit()
+public void GhostHit()
 {
     ghostLives--;
-    Debug.Log($"Ghost hit! Lives left: {ghostLives}");
+    UpdateUI();
 
     if (ghostLives <= 0)
-    {
         LoseGame();
-    }
     else
-    {
         RespawnGhost();
-    }
 }
+
 
     private void RespawnPacman()
 {

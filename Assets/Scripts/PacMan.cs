@@ -29,17 +29,23 @@ public class Enemy : MonoBehaviour
         return;
     }
 
-    var dots = FindObjectsByType<Dot>(FindObjectsSortMode.None);
-    if (dots == null || dots.Length == 0)
-    {
-        Debug.LogWarning("No Dots found in the scene.");
-        return;
-    }
+    var smallDots = FindObjectsByType<Dot>(FindObjectsSortMode.None);
+    var bigDots = FindObjectsByType<BigDot>(FindObjectsSortMode.None);
 
     Transform closest = null;
     float minDist = Mathf.Infinity;
 
-    foreach (var dot in dots)
+    foreach (var dot in smallDots)
+    {
+        float dist = Vector3.Distance(transform.position, dot.transform.position);
+        if (dist < minDist)
+        {
+            minDist = dist;
+            closest = dot.transform;
+        }
+    }
+
+    foreach (var dot in bigDots)
     {
         float dist = Vector3.Distance(transform.position, dot.transform.position);
         if (dist < minDist)
@@ -50,8 +56,11 @@ public class Enemy : MonoBehaviour
     }
 
     if (closest != null)
+    {
         agent.SetDestination(closest.position);
+    }
 }
+
 
 
 
@@ -86,17 +95,20 @@ public class Enemy : MonoBehaviour
     }
 
     void OnTriggerEnter(Collider other)
+{
+    if (other.CompareTag("Player"))
     {
-        if (other.CompareTag("Player"))
+        if (stateMachine.currentState == huntState)
         {
-            if (stateMachine.currentState == huntState)
-            {
-                GameManager.Instance.GhostHit();
-            }
-            else
-            {
-                GameManager.Instance.PacmanHit();
-            }
+            // PacMan hunts the player
+            GameManager.Instance.GhostHit();
+        }
+        else
+        {
+            // Player catches PacMan
+            GameManager.Instance.PacmanHit();
         }
     }
+}
+
 }
